@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{TITRE_DU_SITE}}</title>
+    <meta name="description" content="Portfolio Développeur / Ingénieur Informatique">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* =========================================
+           1. VARIABLES (Thème Dark IDE)
+        ========================================= */
+        :root {
+            /* Palette inspirée de VS Code Dark + ton image */
+            --bg-body: #111111;         /* Fond derrière la fenêtre */
+            --bg-window: #0D1117;       /* Fond de la fenêtre (GitHub Dimmed) */
+            --grid-line: rgba(255, 255, 255, 0.05); /* Lignes de la grille */
+            
+            --text-main: #C9D1D9;       /* Blanc cassé */
+            --text-comment: #8B949E;    /* Gris commentaires */
+            
+            /* Couleurs syntaxiques */
+            --color-keyword: #FF7B72;   /* Rose/Rouge (import, return) */
+            --color-func: #D2A8FF;      /* Violet (fonctions) */
+            --color-string: #A5D6FF;    /* Bleu clair (texte) */
+            --color-accent: #3FB950;    /* Vert Terminal (succès/cmd) */
+            --color-warning: #D29922;   /* Orange (paramètres) */
+
+            --border-radius: 12px;
+        }
+
+        /* =========================================
+           2. BASE & BACKGROUND
+        ========================================= */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: 'JetBrains Mono', monospace; /* Police Code */
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+
+            /* Fond Quadrillé (Grid Pattern) comme sur l'image */
+            background-image: 
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        a { text-decoration: none; color: inherit; transition: 0.2s; }
+        ul { list-style: none; }
+
+        /* Utilitaires de syntaxe pour le style */
+        .kw { color: var(--color-keyword); } /* Keyword */
+        .fn { color: var(--color-func); }    /* Function */
+        .str { color: var(--color-string); } /* String */
+        .cmd { color: var(--color-accent); font-weight: bold; } /* Command line */
+        .comment { color: var(--text-comment); font-style: italic; }
+
+        /* =========================================
+           3. LA FENÊTRE PRINCIPALE (Container)
+        ========================================= */
+        .ide-window {
+            width: 100%;
+            max-width: 900px;
+            background-color: var(--bg-window);
+            border: 1px solid #30363D;
+            border-radius: var(--border-radius);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            overflow: hidden; /* Pour que le header ne dépasse pas */
+            position: relative;
+        }
+
+        /* Barre Mac OS (Traffic Lights) */
+        .window-header {
+            background-color: #161B22;
+            padding: 12px 20px;
+            border-bottom: 1px solid #30363D;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .red { background-color: #FF5F56; }
+        .yellow { background-color: #FFBD2E; }
+        .green { background-color: #27C93F; }
+
+        .window-title {
+            margin-left: 15px;
+            font-size: 0.8rem;
+            color: var(--text-comment);
+            opacity: 0.7;
+        }
+
+        /* Contenu scrolable de la fenêtre */
+        .window-content {
+            padding: 40px;
+        }
+
+        /* =========================================
+           4. SECTIONS DU CONTENU
+        ========================================= */
+        
+        /* Intro style Terminal */
+        .terminal-block { margin-bottom: 50px; }
+        
+        .prompt-line {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        .prompt-line::before {
+            content: "$";
+            color: var(--color-accent);
+            margin-right: 5px;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            color: #FFFFFF;
+            margin-bottom: 10px;
+            letter-spacing: -2px;
+        }
+
+        .role {
+            font-size: 1.2rem;
+            color: var(--text-comment);
+            margin-bottom: 30px;
+        }
+
+        /* Tags (Skills) comme sur l'image */
+        .skill-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .tag-pill {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid #30363D;
+            color: var(--color-accent);
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .tag-pill:hover {
+            border-color: var(--color-accent);
+            background: rgba(63, 185, 80, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Bio (Format commentaire de code) */
+        .bio-block {
+            margin-bottom: 50px;
+            border-left: 3px solid #30363D;
+            padding-left: 20px;
+            color: var(--text-comment);
+        }
+
+        /* Timeline (Format JSON/Object) */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #30363D;
+            padding-bottom: 10px;
+        }
+        .section-header h2 { font-size: 1.2rem; color: var(--color-keyword); }
+        
+        .timeline-entry {
+            margin-bottom: 25px;
+            padding-left: 15px;
+            border-left: 1px dashed #30363D;
+            position: relative;
+        }
+        .timeline-entry::before {
+            content: "•";
+            color: var(--color-func);
+            position: absolute;
+            left: -6px; top: 0;
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+
+        .entry-date { color: var(--color-func); font-size: 0.9rem; margin-bottom: 5px; display: block; }
+        .entry-title { color: var(--text-main); font-weight: 700; font-size: 1.1rem; }
+        .entry-school { color: var(--text-comment); }
+        
+        .entry-details {
+            margin-top: 8px;
+            font-size: 0.9rem;
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 6px;
+        }
+        .entry-details em { color: var(--color-warning); font-style: normal; }
+
+        /* =========================================
+           5. ZONE PROJETS (Grille style "Fichiers")
+        ========================================= */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .code-card {
+            background: #161B22;
+            border: 1px solid #30363D;
+            border-radius: 8px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .code-card:hover {
+            border-color: var(--color-accent);
+            box-shadow: 0 0 15px rgba(63, 185, 80, 0.1);
+            transform: translateY(-5px);
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: var(--color-keyword);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--color-string);
+        }
+
+        .card-desc {
+            font-size: 0.9rem;
+            color: var(--text-comment);
+        }
+        
+        /* Petit curseur clignotant décoratif */
+        .cursor-blink {
+            display: inline-block;
+            width: 8px;
+            height: 18px;
+            background: var(--color-accent);
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* =========================================
+           6. MODALES (Style Popup VS Code)
+        ========================================= */
+        dialog {
+            background: var(--bg-window);
+            color: var(--text-main);
+            border: 1px solid var(--color-func);
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            margin: auto;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        }
+        dialog::backdrop {
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+        }
+        
+        .modal-bar {
+            background: #161B22;
+            padding: 10px 20px;
+            border-bottom: 1px solid #30363D;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .close-btn {
+            background: transparent;
+            border: 1px solid #30363D;
+            color: var(--text-comment);
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .close-btn:hover { background: #30363D; color: white; }
+
+        .modal-body { padding: 30px; }
+
+        .project-item {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #30363D;
+        }
+
+        .tech-stack span {
+            color: var(--color-warning);
+            margin-right: 10px;
+            font-size: 0.85rem;
+        }
+        .tech-stack span::before { content: "#"; opacity: 0.5; }
+
+        .btn-download {
+            display: inline-block;
+            margin-top: 15px;
+            background: var(--color-accent);
+            color: #000;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        .btn-download:hover { background: #50ff65; }
+
+        /* Footer Console */
+        footer {
+            margin-top: 50px;
+            border-top: 1px solid #30363D;
+            padding-top: 20px;
+            font-size: 0.8rem;
+            color: var(--text-comment);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Mobile */
+        @media (max-width: 700px) {
+            h1 { font-size: 2.5rem; }
+            .window-content { padding: 20px; }
+            footer { flex-direction: column; gap: 10px; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="ide-window">
+        <div class="window-header">
+            <div class="dot red"></div>
+            <div class="dot yellow"></div>
+            <div class="dot green"></div>
+            <div class="window-title">portfolio.html — {{PRENOM}}_{{NOM}}</div>
+        </div>
+
+        <div class="window-content">
+            
+            <section class="terminal-block">
+                <div class="prompt-line">whoami</div>
+                <h1>{{PRENOM}} {{NOM}}</h1>
+                <p class="role">{{TITRE_PROFIL}}</p> <div class="prompt-line" style="margin-top: 20px;">skills</div>
+                <div class="skill-tags">
+                    <span class="tag-pill">Python</span>
+                    <span class="tag-pill">JavaScript</span>
+                    <span class="tag-pill">Docker</span>
+                    <span class="tag-pill">AWS</span>
+                    <span class="tag-pill">Git</span>
+                </div>
+            </section>
+
+            <div style="margin-bottom: 40px;">
+                <span class="kw">const</span> <span class="fn">downloadCV</span> = <span class="kw">()</span> => {
+                    <a href="#" style="border-bottom: 1px solid var(--color-string); color: var(--color-string);">"Télécharger_mon_CV.pdf"</a>;
+                };
+            </div>
+
+            <section class="bio-block">
+                /**<br>
+                * <span style="color:var(--text-main)">À propos de moi</span><br>
+                * ---------------------------------<br>
+                * {{DESCRIPTION_PROFIL}}<br>
+                * <br>
+                * @goal Recherche de stage / Alternance<br>
+                */
+            </section>
+
+            <section id="timeline">
+                <div class="section-header">
+                    <h2>$ git log --formation</h2>
+                </div>
+
+                <div class="timeline-entry">
+                    <span class="entry-date">[2023 - 2025]</span>
+                    <div class="entry-title">Master Ingénierie Informatique</div>
+                    <div class="entry-school">École Polytechnique, Paris</div>
+                    <div class="entry-details">
+                        > Spécialisation : <em>Cybersécurité & Réseaux</em><br>
+                        > Modules : Cryptographie, Pentest, Linux Kernel.
+                    </div>
+                </div>
+
+                <div class="timeline-entry">
+                    <span class="entry-date">[2020 - 2023]</span>
+                    <div class="entry-title">Licence Info</div>
+                    <div class="entry-school">Université de Bordeaux</div>
+                    <div class="entry-details">
+                        > Spécialisation : <em>Algorithmique</em><br>
+                        > Modules : C++, Java, Structure de données.
+                    </div>
+                </div>
+            </section>
+
+            <section id="projects" style="margin-top: 50px;">
+                <div class="section-header">
+                    <h2>$ ls ./projects/</h2>
+                    <span class="cursor-blink"></span>
+                </div>
+
+                <div class="projects-grid">
+                    <div class="code-card" onclick="openModal('modal-projects')">
+                        <div class="card-icon">📂</div>
+                        <div class="card-title">/src/main_projects</div>
+                        <div class="card-desc">
+                            <span class="comment">// Tous mes projets académiques et techniques majeurs.</span>
+                        </div>
+                    </div>
+
+                    <div class="code-card" onclick="openModal('modal-others')">
+                        <div class="card-icon">📦</div>
+                        <div class="card-title">/lib/{{TITRE_AUTRE_CATEGORIE}}</div>
+                        <div class="card-desc">
+                            <span class="comment">// Expériences annexes, TPs et labos.</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <footer>
+                <div>
+                    <span class="cmd">contact:</span> <a href="mailto:{{EMAIL}}" class="str">{{EMAIL}}</a> | 
+                    <a href="{{LINKEDIN_URL}}" target="_blank" class="kw">LinkedIn</a>
+                </div>
+                <div>
+                    <a href="mentions.html" style="text-decoration: underline;">System.exit(0) // Mentions Légales</a>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <dialog id="modal-projects">
+        <div class="modal-bar">
+            <span style="font-size:0.9rem;">projects_viewer.exe</span>
+            <button class="close-btn" onclick="closeModal('modal-projects')">X</button>
+        </div>
+        <div class="modal-body">
+            
+            <div class="project-item">
+                <h3 style="color:var(--color-string); margin-bottom:5px;">"Développement API REST"</h3>
+                <p style="color:var(--text-comment); font-size:0.85rem; margin-bottom:10px;">// Année 4 — Projet Semestriel</p>
+                
+                <div class="tech-stack">
+                    <span>Node.js</span> <span>Express</span> <span>MongoDB</span>
+                </div>
+                
+                <p style="margin-top:10px;">
+                    Architecture micro-services pour une application de e-commerce. Gestion de l'authentification JWT et déploiement Docker.
+                </p>
+
+                <a href="#" class="btn-download">
+                    $ cat report.pdf
+                </a>
+            </div>
+
+            <div class="project-item">
+                <h3 style="color:var(--color-string); margin-bottom:5px;">"Script d'automatisation Python"</h3>
+                <p style="color:var(--text-comment); font-size:0.85rem; margin-bottom:10px;">// Année 3 — Stage</p>
+                <div class="tech-stack">
+                    <span>Python</span> <span>Selenium</span>
+                </div>
+                <p style="margin-top:10px;">Scraping de données financières et génération de rapports Excel automatiques.</p>
+            </div>
+
+        </div>
+    </dialog>
+
+    <dialog id="modal-others">
+        <div class="modal-bar">
+            <span style="font-size:0.9rem;">other_files.log</span>
+            <button class="close-btn" onclick="closeModal('modal-others')">X</button>
+        </div>
+        <div class="modal-body">
+            <p class="comment">// Contenu de la catégorie secondaire...</p>
+        </div>
+    </dialog>
+
+    <script>
+        function openModal(id) {
+            document.getElementById(id).showModal();
+        }
+        function closeModal(id) {
+            document.getElementById(id).close();
+        }
+        // Fermeture au clic dehors
+        document.querySelectorAll('dialog').forEach(d => {
+            d.addEventListener('click', e => {
+                if (e.target === d) d.close();
+            });
+        });
+    </script>
+</body>
+</html>
